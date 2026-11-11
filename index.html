@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuickShop - Instant Bill & WhatsApp Invoice</title>
+    <style>
+        :root {
+            --bg-body: #f1f5f9;
+            --surface: #ffffff;
+            --surface-subtle: #f8fafc;
+            --border: #e2e8f0;
+            --border-dark: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --emerald-base: #059669;
+            --emerald-hover: #047857;
+            --emerald-soft: #ecfdf5;
+            --emerald-border: #a7f3d0;
+            --wa-green: #25d366;
+            --wa-dark: #128c7e;
+            --rose-base: #e11d48;
+            --rose-soft: #fff1f2;
+            --rose-border: #fecdd3;
+            --header-bg: #0f172a;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding-bottom: 95px;
+            min-height: 100vh;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Top Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: var(--header-bg);
+            color: #ffffff;
+            border-bottom: 1px solid #1e293b;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-wrap {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--emerald-base);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .shop-heading {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-edit-shop {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-edit-shop svg {
+            fill: currentColor;
+        }
+
+        .btn-edit-shop:hover {
+            color: #ffffff;
+        }
+
+        .date-subtext {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .total-chip {
+            text-align: right;
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+        }
+
+        .total-chip-lbl {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #34d399;
+            font-weight: 700;
+        }
+
+        .total-chip-val {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: #ffffff;
+        }
+
+        /* Container */
+        main {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        /* Collapsible Customer Section */
+        .card-header-toggle {
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .card-header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .card-header-title svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--emerald-base);
+        }
+
+        .sub-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .customer-form-body {
+            display: none;
+            padding: 12px 14px 14px;
+            border-top: 1px solid var(--border);
+            background: var(--surface-subtle);
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 500px) {
+            .customer-form-body {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .customer-form-body.active {
+            display: grid;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .phone-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .phone-prefix {
+            position: absolute;
+            left: 10px;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 13px;
+            border: 1px solid var(--border-dark);
+            border-radius: var(--radius-md);
+            background: #ffffff;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .input-text:focus {
+            border-color: var(--emerald-base);
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+        }
+
+        .phone-input {
+            padding-left: 40px;
+        }
+
+        /* Items Table */
+        .table-head {
+            display: grid;
+            grid-template-columns: 1fr 78px 58px 74px 34px;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
+        }
+
+        .col-right { text-align: right; }
+        .col-center { text-align: center; }
+
+        .items-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr 78px 58px 74px 34px;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #ffffff;
+        }
+
+        .item-row:hover {
+            background: #fafafa;
+        }
+
+        .item-input {
+            width: 100%;
+            padding: 7px 8px;
+            font-size: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #ffffff;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .item-input:focus {
+            border-color: var(--emerald-base);
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+        }
+
+        .item-rate {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .item-qty {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .item-total {
+            text-align: right;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-main);
+            padding-right: 2px;
+        }
+
+        .btn-delete-row {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete-row:hover {
+            color: var(--rose-base);
+            background: var(--rose-soft);
+        }
+
+        .table-actions {
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .btn-add {
+            background: var(--emerald-base);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-add:hover {
+            background: var(--emerald-hover);
+        }
+
+        .btn-clear {
+            background: none;
+            border: 1px solid var(--rose-border);
+            color: var(--rose-base);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-clear:hover {
+            background: var(--rose-soft);
+        }
+
+        /* Summary */
+        .summary-card {
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .summary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .summary-row-bold {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .discount-field-wrap {
+            width: 100px;
+        }
+
+        .discount-input {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .grand-total-banner {
+            margin-top: 6px;
+            background: var(--emerald-soft);
+            border: 1px solid var(--emerald-border);
+            border-radius: var(--radius-lg);
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .grand-title {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #065f46;
+        }
+
+        .grand-subtitle {
+            font-size: 11px;
+            color: #047857;
+        }
+
+        .grand-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #064e3b;
+        }
+
+        .app-footer {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 12px 16px 16px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .app-footer a {
+            color: var(--emerald-base);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Fixed Bottom Action Bar */
+        .fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid var(--border);
+            padding: 10px 14px;
+            z-index: 30;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .bottom-wrap {
+            max-width: 680px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon-action {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-dark);
+            background: #ffffff;
+            color: #334155;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-icon-action:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-icon-action svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .btn-whatsapp-send {
+            flex: 1;
+            height: 44px;
+            background: var(--wa-dark);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(18, 140, 126, 0.25);
+        }
+
+        .btn-whatsapp-send:hover {
+            background: var(--wa-green);
+        }
+
+        .btn-whatsapp-send svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .wa-price-badge {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 50;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 380px;
+            border-radius: var(--radius-xl);
+            padding: 18px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 60;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Thermal Print */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableReceipt, #printableReceipt * {
+                visibility: visible;
+            }
+            #printableReceipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+                background: #ffffff;
+                color: #000000;
+                padding: 10px;
+                font-family: monospace;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STICKY HEADER -->
+    <header>
+        <div class="header-wrap">
+            <div class="brand-group">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H6v-2h6v2zm4-4H6v-2h10v2zm0-4H6V7h10v2z"/></svg>
+                </div>
+                <div>
+                    <h1 class="shop-heading">
+                        <span id="shopTitleDisplay">Grocery & General Store</span>
+                        <button type="button" onclick="openShopSettingsModal()" title="Edit Shop Details" class="btn-edit-shop">
+                            <svg style="width:14px;height:14px;" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                        </button>
+                    </h1>
+                    <div class="date-subtext">
+                        <span id="headerDate">Today</span><span id="shopDetailsLine"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-chip">
+                <div class="total-chip-lbl">Total Due</div>
+                <div class="total-chip-val">₹<span id="topGrandTotal">0.00</span></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BODY -->
+    <main>
+
+        <!-- CUSTOMER DETAILS (OPTIONAL) -->
+        <section class="card">
+            <div class="card-header-toggle" onclick="toggleCustomerDetails()">
+                <div class="card-header-title">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <span>Customer Details <span class="sub-hint">(Optional)</span></span>
+                </div>
+                <span id="customerToggleIcon" style="font-size: 12px; color: #94a3b8;">▼</span>
+            </div>
+            <div id="customerSectionBody" class="customer-form-body">
+                <div class="field-group">
+                    <label class="field-label">Customer Name</label>
+                    <input type="text" id="custName" placeholder="e.g. Rahul Sharma" oninput="calculateBill()" class="input-text">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">WhatsApp Number</label>
+                    <div class="phone-wrapper">
+                        <span class="phone-prefix">+91</span>
+                        <input type="tel" id="custPhone" placeholder="9876543210" maxlength="10" class="input-text phone-input">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BILL ITEMS CONTAINER -->
+        <section class="card">
+            <div class="table-head">
+                <div>Item Name</div>
+                <div class="col-right">Rate (₹)</div>
+                <div class="col-center">Qty</div>
+                <div class="col-right">Total (₹)</div>
+                <div></div>
+            </div>
+
+            <!-- Dynamic Rows -->
+            <div id="itemsList" class="items-container"></div>
+
+            <div class="table-actions">
+                <button type="button" onclick="addNewItemRow(true)" class="btn-add">
+                    <span style="font-size: 15px; line-height: 1;">+</span> Add Item
+                </button>
+                <button type="button" onclick="confirmClearBill()" class="btn-clear">Clear All</button>
+            </div>
+        </section>
+
+        <!-- SUMMARY CARD -->
+        <section class="card summary-card">
+            <div class="summary-row">
+                <span>Subtotal (<span id="totalItemsCount">0</span> items)</span>
+                <span class="summary-row-bold">₹<span id="subTotalDisplay">0.00</span></span>
+            </div>
+
+            <div class="summary-row">
+                <span>Discount (₹)</span>
+                <div class="discount-field-wrap">
+                    <input type="number" id="discountAmount" value="0" min="0" step="any" oninput="calculateBill()" class="input-text discount-input">
+                </div>
+            </div>
+
+            <div class="grand-total-banner">
+                <div>
+                    <div class="grand-title">Payable Total</div>
+                    <div class="grand-subtitle">Inclusive of all items</div>
+                </div>
+                <div class="grand-value">₹<span id="bottomGrandTotal">0.00</span></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="app-footer">
+        <div>Designed by <a href="https://www.linkedin.com/in/muralidharan-kasi/" target="_blank" rel="noopener noreferrer">Muralidharan</a></div>
+        <div>Contact: <a href="tel:+918072152521">8072152521</a></div>
+    </footer>
+
+    <!-- FIXED BOTTOM BAR -->
+    <div class="fixed-bottom">
+        <div class="bottom-wrap">
+            <button type="button" onclick="copyBillText()" title="Copy Receipt Text" class="btn-icon-action">
+                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            </button>
+
+            <button type="button" onclick="printReceipt()" title="Print Thermal Receipt" class="btn-icon-action">
+                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+            </button>
+
+            <button type="button" onclick="sendWhatsAppInvoice()" class="btn-whatsapp-send">
+                <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.98.58 3.86 1.63 5.46L2 22l4.82-1.68c1.54.94 3.32 1.45 5.22 1.45h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01C17.18 3.02 14.69 2 12.04 2z"/></svg>
+                <span>Send WhatsApp</span>
+                <span class="wa-price-badge">₹<span id="footerBtnTotal">0.00</span></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="shopModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">Shop Details</div>
+                <button type="button" onclick="closeShopSettingsModal()" class="btn-close-modal">✕</button>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Shop / Business Name</label>
+                <input type="text" id="shopNameInput" class="input-text">
+            </div>
+            <div class="field-group">
+                <label class="field-label">Address / Landmark</label>
+                <input type="text" id="shopAddressInput" class="input-text" placeholder="Main Road Market">
+            </div>
+            <div class="field-group">
+                <label class="field-label">Contact / Phone / UPI</label>
+                <input type="text" id="shopContactInput" class="input-text" placeholder="+91 99999 88888">
+            </div>
+            <button type="button" onclick="saveShopSettings()" class="btn-add" style="justify-content:center; padding:10px;">Save Details</button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+        <span id="toastMsg">Action completed</span>
+    </div>
+
+    <!-- PRINT LAYOUT -->
+    <div id="printableReceipt" style="display:none;">
+        <div style="text-align: center; margin-bottom: 8px;">
+            <h2 style="margin:0; font-size:16px;" id="printShopName">STORE RECEIPT</h2>
+            <p style="margin:2px 0; font-size:10px;" id="printShopAddress"></p>
+            <p style="margin:2px 0; font-size:10px;" id="printShopPhone"></p>
+            <div style="margin: 4px 0;">--------------------------------</div>
+            <p style="margin:2px 0; font-size:10px;" id="printDateTime"></p>
+            <p style="margin:2px 0; font-size:10px;" id="printCustomerInfo"></p>
+            <div style="margin: 4px 0;">================================</div>
+        </div>
+        <div id="printItemsList" style="font-size: 11px;"></div>
+        <div style="text-align: right; border-top: 1px dashed black; padding-top: 4px; font-size: 11px; margin-top: 6px;">
+            <p style="margin: 2px 0;" id="printSubtotal"></p>
+            <p style="margin: 2px 0;" id="printDiscount"></p>
+            <h3 style="margin: 4px 0; font-size: 14px;" id="printGrandTotal"></h3>
+        </div>
+        <div style="text-align: center; margin-top: 10px; font-size: 10px;">
+            <p>Thank you! Visit again!</p>
+        </div>
+    </div>
+
+    <!-- APPLICATION JAVASCRIPT -->
+    <script>
+        var DEFAULT_SHOP_NAME = 'Grocery & General Store';
+        var shopProfile = {
+            name: localStorage.getItem('qs_shop_name') || DEFAULT_SHOP_NAME,
+            address: localStorage.getItem('qs_shop_address') || 'Main Road Market',
+            contact: localStorage.getItem('qs_shop_contact') || ''
+        };
+
+        var items = [];
+        var nextRowId = 1;
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function toggleCustomerDetails() {
+            var body = document.getElementById('customerSectionBody');
+            var icon = document.getElementById('customerToggleIcon');
+            body.classList.toggle('active');
+            if (body.classList.contains('active')) {
+                icon.innerText = '▲';
+                document.getElementById('custName').focus();
+            } else {
+                icon.innerText = '▼';
+            }
+        }
+
+        function addNewItemRow(focusOnName) {
+            var rowId = nextRowId++;
+            items.push({
+                id: rowId,
+                name: '',
+                rate: '',
+                qty: '' // Empty so placeholder 1 shows
+            });
+            renderItems();
+
+            if (focusOnName) {
+                setTimeout(function() {
+                    var el = document.getElementById('item-name-' + rowId);
+                    if (el) el.focus();
+                }, 50);
+            }
+        }
+
+        function removeItemRow(id) {
+            if (items.length <= 1) {
+                items = [{ id: nextRowId++, name: '', rate: '', qty: '' }];
+            } else {
+                items = items.filter(function(item) { return item.id !== id; });
+            }
+            renderItems();
+            calculateBill();
+        }
+
+        function renderItems() {
+            var container = document.getElementById('itemsList');
+            container.innerHTML = '';
+
+            items.forEach(function(item, index) {
+                var rowDiv = document.createElement('div');
+                rowDiv.className = 'item-row';
+                rowDiv.id = 'row-' + item.id;
+
+                var rateVal = parseFloat(item.rate) || 0;
+                var qtyVal = (item.qty === '' || item.qty === null) ? 1 : (parseFloat(item.qty) || 0);
+                var rowTotal = (rateVal * qtyVal).toFixed(2);
+
+                rowDiv.innerHTML = 
+                    '<div>' +
+                        '<input type="text" id="item-name-' + item.id + '" value="' + escapeHtml(item.name) + '" ' +
+                            'placeholder="Item ' + (index + 1) + ' name" ' +
+                            'oninput="updateItemField(' + item.id + ', \'name\', this.value)" ' +
+                            'onkeydown="handleKeyNavigation(event, ' + item.id + ', \'name\')" ' +
+                            'class="item-input">' +
+                    '</div>' +
+                    '<div>' +
+                        '<input type="number" id="item-rate-' + item.id + '" value="' + item.rate + '" ' +
+                            'placeholder="0" step="any" min="0" ' +
+                            'oninput="updateItemField(' + item.id + ', \'rate\', this.value)" ' +
+                            'onkeydown="handleKeyNavigation(event, ' + item.id + ', \'rate\')" ' +
+                            'class="item-input item-rate">' +
+                    '</div>' +
+                    '<div>' +
+                        '<input type="number" id="item-qty-' + item.id + '" value="' + item.qty + '" ' +
+                            'placeholder="1" step="any" min="0.01" ' +
+                            'oninput="updateItemField(' + item.id + ', \'qty\', this.value)" ' +
+                            'onkeydown="handleKeyNavigation(event, ' + item.id + ', \'qty\')" ' +
+                            'class="item-input item-qty">' +
+                    '</div>' +
+                    '<div class="item-total">' +
+                        '₹<span id="row-total-' + item.id + '">' + rowTotal + '</span>' +
+                    '</div>' +
+                    '<div>' +
+                        '<button type="button" onclick="removeItemRow(' + item.id + ')" title="Delete row" class="btn-delete-row">' +
+                            '✕' +
+                        '</button>' +
+                    '</div>';
+
+                container.appendChild(rowDiv);
+            });
+        }
+
+        function updateItemField(id, field, value) {
+            var item = items.find(function(i) { return i.id === id; });
+            if (!item) return;
+
+            item[field] = value;
+
+            var rateVal = parseFloat(item.rate) || 0;
+            var qtyVal = (item.qty === '' || item.qty === null) ? 1 : (parseFloat(item.qty) || 0);
+            var total = (rateVal * qtyVal).toFixed(2);
+
+            var totalEl = document.getElementById('row-total-' + id);
+            if (totalEl) totalEl.innerText = total;
+
+            calculateBill();
+        }
+
+        function handleKeyNavigation(event, currentId, currentField) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (currentField === 'name') {
+                    var rateInput = document.getElementById('item-rate-' + currentId);
+                    if (rateInput) rateInput.focus();
+                } else if (currentField === 'rate') {
+                    var qtyInput = document.getElementById('item-qty-' + currentId);
+                    if (qtyInput) qtyInput.focus();
+                } else if (currentField === 'qty') {
+                    var currentIndex = items.findIndex(function(i) { return i.id === currentId; });
+                    if (currentIndex === items.length - 1) {
+                        addNewItemRow(true);
+                    } else {
+                        var nextItem = items[currentIndex + 1];
+                        var nextNameInput = document.getElementById('item-name-' + nextItem.id);
+                        if (nextNameInput) nextNameInput.focus();
+                    }
+                }
+            }
+        }
+
+        function calculateBill() {
+            var subtotal = 0;
+            var validItemCount = 0;
+
+            items.forEach(function(item) {
+                var rate = parseFloat(item.rate) || 0;
+                var qty = (item.qty === '' || item.qty === null) ? 1 : (parseFloat(item.qty) || 0);
+                subtotal += (rate * qty);
+
+                if (item.name.trim() !== '' || rate > 0) {
+                    validItemCount++;
+                }
+            });
+
+            var discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+            var grandTotal = Math.max(0, subtotal - discount);
+
+            document.getElementById('topGrandTotal').innerText = grandTotal.toFixed(2);
+            document.getElementById('bottomGrandTotal').innerText = grandTotal.toFixed(2);
+            document.getElementById('footerBtnTotal').innerText = grandTotal.toFixed(2);
+            document.getElementById('subTotalDisplay').innerText = subtotal.toFixed(2);
+            document.getElementById('totalItemsCount').innerText = validItemCount;
+        }
+
+        function generateWhatsAppMessageText(encoded) {
+            var custName = document.getElementById('custName').value.trim();
+            var discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+            var validItems = items.filter(function(item) {
+                return item.name.trim() !== '' || parseFloat(item.rate) > 0;
+            });
+
+            var subtotal = 0;
+            validItems.forEach(function(item) {
+                var r = parseFloat(item.rate) || 0;
+                var q = (item.qty === '' || item.qty === null) ? 1 : (parseFloat(item.qty) || 0);
+                subtotal += (r * q);
+            });
+
+            var grandTotal = Math.max(0, subtotal - discount);
+            var now = new Date();
+            var dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            var timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            var LINE_WIDTH = 30;
+            var divider = '-'.repeat(LINE_WIDTH);
+
+            var lines = [];
+            lines.push('*INVOICE / BILL*');
+            lines.push('*' + shopProfile.name.toUpperCase() + '*');
+            if (shopProfile.address) lines.push(shopProfile.address);
+            if (shopProfile.contact) lines.push('Contact: ' + shopProfile.contact);
+            lines.push(dateStr + ', ' + timeStr);
+            if (custName) lines.push('Customer: *' + custName + '*');
+            lines.push('━━━━━━━━━━━━━━━━━━━━━━');
+            lines.push('```');
+
+            if (validItems.length > 0) {
+                validItems.forEach(function(item, idx) {
+                    var itemName = item.name.trim() || ('Item ' + (idx + 1));
+                    var r = parseFloat(item.rate) || 0;
+                    var q = (item.qty === '' || item.qty === null) ? 1 : (parseFloat(item.qty) || 0);
+                    var tot = (r * q).toFixed(2);
+
+                    lines.push((idx + 1) + '. ' + itemName);
+                    var mathPart = '   ' + q + ' x ' + r.toFixed(2);
+                    var pricePart = 'Rs. ' + tot;
+                    var spacesNeeded = Math.max(1, LINE_WIDTH - mathPart.length - pricePart.length);
+                    lines.push(mathPart + ' '.repeat(spacesNeeded) + pricePart);
+                });
+            } else {
+                lines.push('No items listed');
+            }
+
+            lines.push(divider);
+
+            var subLabel = 'Subtotal:';
+            var subVal = 'Rs. ' + subtotal.toFixed(2);
+            var subSpaces = Math.max(1, LINE_WIDTH - subLabel.length - subVal.length);
+            lines.push(subLabel + ' '.repeat(subSpaces) + subVal);
+
+            if (discount > 0) {
+                var discLabel = 'Discount:';
+                var discVal = '-Rs. ' + discount.toFixed(2);
+                var discSpaces = Math.max(1, LINE_WIDTH - discLabel.length - discVal.length);
+                lines.push(discLabel + ' '.repeat(discSpaces) + discVal);
+            }
+
+            lines.push('```');
+            lines.push('*GRAND TOTAL: ₹' + grandTotal.toFixed(2) + '*');
+            lines.push('━━━━━━━━━━━━━━━━━━━━━━');
+            lines.push('_Thank you for shopping with us!_');
+
+            var msg = lines.join('\n');
+            return encoded ? encodeURIComponent(msg) : msg;
+        }
+
+        function sendWhatsAppInvoice() {
+            var validItems = items.filter(function(item) {
+                return item.name.trim() !== '' || parseFloat(item.rate) > 0;
+            });
+            if (validItems.length === 0) {
+                showToast("Please enter at least one item or rate!");
+                return;
+            }
+
+            var phoneInput = document.getElementById('custPhone').value.trim().replace(/\D/g, '');
+            var encodedText = generateWhatsAppMessageText(true);
+
+            var waUrl = '';
+            if (phoneInput.length === 10) {
+                waUrl = 'https://wa.me/91' + phoneInput + '?text=' + encodedText;
+            } else if (phoneInput.length > 10) {
+                waUrl = 'https://wa.me/' + phoneInput + '?text=' + encodedText;
+            } else {
+                waUrl = 'https://wa.me/?text=' + encodedText;
+            }
+
+            window.open(waUrl, '_blank');
+        }
+
+        function copyBillText() {
+            var text = generateWhatsAppMessageText(false);
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showToast("Bill copied to clipboard!");
+                }).catch(function() { fallbackCopy(text); });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            var tempTextArea = document.createElement("textarea");
+            tempTextArea.value = text;
+            tempTextArea.style.position = "fixed";
+            tempTextArea.style.opacity = "0";
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Bill copied to clipboard!");
+            } catch (err) {
+                showToast("Could not copy text.");
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        function printReceipt() {
+            var validItems = items.filter(function(item) {
+                return item.name.trim() !== '' || parseFloat(item.rate) > 0;
+            });
+            if (validItems.length === 0) {
+                showToast("Please add items before printing!");
+                return;
+            }
+
+            var custName = document.getElementById('custName').value.trim();
+            var custPhone = document.getElementById('custPhone').value.trim();
+            var discount = parseFloat(document.getElementById('discountAmount').value) || 0;
+
+            document.getElementById('printShopName').innerText = shopProfile.name.toUpperCase();
+            document.getElementById('printShopAddress').innerText = shopProfile.address || '';
+            document.getElementById('printShopPhone').innerText = shopProfile.contact ? ('Tel: ' + shopProfile.contact) : '';
+
+            var now = new Date();
+            document.getElementById('printDateTime').innerText = 'Date: ' + now.toLocaleDateString('en-IN') + ' ' + now.toLocaleTimeString('en-IN');
+            document.getElementById('printCustomerInfo').innerText = custName ? ('Customer: ' + custName + (custPhone ? ' (' + custPhone + ')' : '')) : '';
+
+            var subtotal = 0;
+            var itemsHtml = '<table style="width:100%; border-collapse: collapse; text-align: left;"><tr style="border-bottom: 1px dashed #666;"><th style="padding: 2px 0;">Item</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Rate</th><th style="text-align:right;">Total</th></tr>';
+
+            validItems.forEach(function(it, i) {
+                var r = parseFloat(it.rate) || 0;
+                var q = (it.qty === '' || it.qty === null) ? 1 : (parseFloat(it.qty) || 0);
+                var tot = r * q;
+                subtotal += tot;
+                itemsHtml += '<tr><td style="padding: 2px 0;">' + (it.name || ('Item ' + (i + 1))) + '</td><td style="text-align:center;">' + q + '</td><td style="text-align:right;">' + r.toFixed(2) + '</td><td style="text-align:right;">' + tot.toFixed(2) + '</td></tr>';
+            });
+
+            itemsHtml += '</table>';
+            document.getElementById('printItemsList').innerHTML = itemsHtml;
+            document.getElementById('printSubtotal').innerText = 'Subtotal: Rs. ' + subtotal.toFixed(2);
+            document.getElementById('printDiscount').innerText = discount > 0 ? ('Discount: -Rs. ' + discount.toFixed(2)) : '';
+
+            var grandTotal = Math.max(0, subtotal - discount);
+            document.getElementById('printGrandTotal').innerText = 'TOTAL: Rs. ' + grandTotal.toFixed(2);
+
+            window.print();
+        }
+
+        function confirmClearBill() {
+            if (confirm("Are you sure you want to clear the entire bill?")) {
+                items = [];
+                nextRowId = 1;
+                document.getElementById('custName').value = '';
+                document.getElementById('custPhone').value = '';
+                document.getElementById('discountAmount').value = '0';
+                addNewItemRow();
+                addNewItemRow();
+                calculateBill();
+                showToast("Bill cleared!");
+            }
+        }
+
+        function openShopSettingsModal() {
+            document.getElementById('shopNameInput').value = shopProfile.name;
+            document.getElementById('shopAddressInput').value = shopProfile.address;
+            document.getElementById('shopContactInput').value = shopProfile.contact;
+            document.getElementById('shopModal').classList.add('open');
+        }
+
+        function closeShopSettingsModal() {
+            document.getElementById('shopModal').classList.remove('open');
+        }
+
+        function saveShopSettings() {
+            shopProfile.name = document.getElementById('shopNameInput').value.trim() || DEFAULT_SHOP_NAME;
+            shopProfile.address = document.getElementById('shopAddressInput').value.trim();
+            shopProfile.contact = document.getElementById('shopContactInput').value.trim();
+            localStorage.setItem('qs_shop_name', shopProfile.name);
+            localStorage.setItem('qs_shop_address', shopProfile.address);
+            localStorage.setItem('qs_shop_contact', shopProfile.contact);
+            updateShopUI();
+            closeShopSettingsModal();
+            showToast("Shop details saved!");
+        }
+
+        function updateShopUI() {
+            document.getElementById('shopTitleDisplay').innerText = shopProfile.name;
+            var details = [shopProfile.address, shopProfile.contact].filter(Boolean).join(' · ');
+            document.getElementById('shopDetailsLine').innerText = details ? ' · ' + details : '';
+        }
+
+
+        function showToast(message) {
+            var toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = message;
+            toast.classList.add('show');
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // Initialize on DOMContentLoaded or Load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateShopUI();
+            var today = new Date();
+            var dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+            document.getElementById('headerDate').innerText = today.toLocaleDateString('en-IN', dateOptions);
+
+            addNewItemRow();
+            addNewItemRow();
+            calculateBill();
+        });
+    </script>
+</body>
+</html>
